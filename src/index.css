@@ -1,0 +1,12 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Custom globals (optional) */
+html, body, #root {
+  height: 100%;
+}
+
+/* Tailwind classes can be applied directly in markup to avoid unknown at-rules in some editors */
+
+
