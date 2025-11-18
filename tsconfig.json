@@ -16,7 +16,7 @@
     "baseUrl": "src",
     "paths": {
       "@ui/*": ["ui/*"],
-      "@widgets/*": ["widgets/*"],
+      "@components/*": ["components/*"],
       "@lib/*": ["lib/*"]
     }
   },

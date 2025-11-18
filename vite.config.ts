@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@ui': fileURLToPath(new URL('./src/ui', import.meta.url)),
-      '@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
+      '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
       '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
     },
   },

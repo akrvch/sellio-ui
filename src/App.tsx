@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Checkbox, Radio, Badge, Breadcrumbs, Text, Input, Tabs } from '@ui'
-import Header from '@widgets/header'
-import Footer from '@widgets/footer'
+import Header from '@components/header'
+import Footer from '@components/footer'
 
 export default function App() {
   return (
