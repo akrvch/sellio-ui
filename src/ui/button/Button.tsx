@@ -29,7 +29,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed'
+    'inline-flex items-center justify-center gap-2 rounded p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed'
 
   // padding: 8px -> p-2
   const sizeClasses = size === 'small' ? 'text-[14px]' : 'text-[16px] font-bold'

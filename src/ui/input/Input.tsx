@@ -13,7 +13,7 @@ export type InputProps = Omit<
 }
 
 const fieldBase =
-  'block w-full rounded-md border transition focus-visible:outline-none px-3'
+  'block w-full rounded border transition focus-visible:outline-none px-3'
 
 export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
   { className, inputClassName, error, disabled, left, right, size = 'medium', ...props },
@@ -25,7 +25,7 @@ export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
     : 'border-gray-500 hover:border-brand-black'
   const ring = isInvalid
     ? 'focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2'
-    : 'focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2'
+    : 'focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-1'
   const colors = disabled
     ? 'bg-gray-100 text-gray-500 placeholder:text-gray-600'
     : 'bg-white text-brand-black placeholder:text-gray-600'
@@ -38,11 +38,15 @@ export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
     <div className={cn('w-full', className)}>
       <div
         className={cn(
-          'relative flex items-center gap-2',
+          'relative flex items-center',
           disabled && 'cursor-not-allowed',
         )}
       >
-        {left && <div className="pointer-events-none pl-3">{left}</div>}
+        {left && (
+          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            {left}
+          </div>
+        )}
         <input
           ref={ref}
           disabled={disabled}
@@ -53,13 +57,17 @@ export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
             border,
             ring,
             colors,
-            left && 'pl-0',
-            right && 'pr-0',
+            left && 'pl-10',
+            right && 'pr-10',
             inputClassName,
           )}
           {...props}
         />
-        {right && <div className="pr-3">{right}</div>}
+        {right && (
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+            {right}
+          </div>
+        )}
       </div>
       {error && (
         <p className="mt-1 text-[12px] leading-[20px] text-red-600">{error}</p>

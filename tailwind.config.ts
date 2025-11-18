@@ -15,6 +15,7 @@ export default {
           100: '#DDE0FF',
           50: '#E6E8FA',
         },
+        site: '#FAFAFF',
         green: {
           400: '#34C58F',
           300: '#76DEB8',

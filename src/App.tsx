@@ -1,12 +1,13 @@
 import React from 'react'
 import { Button, Checkbox, Radio, Badge, Breadcrumbs, Text, Input, Tabs } from '@ui'
 import Header from '@widgets/header'
+import Footer from '@widgets/footer'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-site text-gray-900 px-4 sm:px-20 pt-4 pb-6 sm:py-[50px]">
       <Header />
-      <div className="max-w-xl mx-auto bg-white shadow-sm rounded-xl p-8 mt-6">
+      <div className="max-w-xl mx-auto bg-white shadow-sm rounded p-8 mt-6">
         <h1 className="text-2xl font-bold">
           Vite + React + SWC + Tailwind
         </h1>
@@ -185,6 +186,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

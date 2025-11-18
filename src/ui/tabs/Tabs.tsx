@@ -45,7 +45,7 @@ export default function Tabs({
               aria-selected={selected}
               disabled={item.disabled}
               className={cn(
-                'p-2 rounded-lg border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2',
+                'p-2 rounded border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2',
                 'border-indigo-200 text-brand-black',
                 'hover:bg-indigo-50',
                 selected && 'bg-indigo-100',
