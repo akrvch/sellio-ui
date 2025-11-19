@@ -2,11 +2,47 @@ import React from 'react'
 import { Button, Checkbox, Radio, Badge, Breadcrumbs, Text, Input, Tabs } from '@ui'
 import Header from '@components/header'
 import Footer from '@components/footer'
+import BannerCarousel, { type Banner } from '@components/banner-carousel'
+
+const banners: Banner[] = [
+  {
+    id: '1',
+    title: 'Запчастини та аксесуари для ваших гаджетів',
+    buttonText: 'До покупок',
+    buttonLink: '#',
+    backgroundImage: '/banners/banner1.png',
+    backgroundColor: '#6366F1',
+    buttonVariant: 'contained',
+  },
+  {
+    id: '2',
+    title: 'Нова колекція аксесуарів',
+    subtitle: 'Знижки до 50%',
+    buttonText: 'Переглянути',
+    buttonLink: '#',
+    backgroundImage: '/banners/banner2.png',
+    backgroundColor: '#8B5CF6',
+    buttonVariant: 'subtle',
+  },
+  {
+    id: '3',
+    title: 'Безкоштовна доставка',
+    subtitle: 'При замовленні від 1000 грн',
+    buttonText: 'Дізнатись більше',
+    buttonLink: '#',
+    backgroundImage: '/banners/banner1.png',
+    backgroundColor: '#EC4899',
+    buttonVariant: 'outlined',
+  },
+]
 
 export default function App() {
   return (
     <div className="min-h-screen bg-site text-gray-900 px-4 sm:px-20 pt-4 pb-6 sm:py-[50px]">
       <Header />
+      <div className="mt-6">
+        <BannerCarousel banners={banners} />
+      </div>
       <div className="max-w-xl mx-auto bg-white shadow-sm rounded p-8 mt-6">
         <h1 className="text-2xl font-bold">
           Vite + React + SWC + Tailwind

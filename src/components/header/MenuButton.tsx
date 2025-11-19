@@ -57,12 +57,22 @@ const SUBCATEGORIES: SubMap = {
 export default function MenuButton() {
   const [open, setOpen] = React.useState(false)
   const [active, setActive] = React.useState<Category>(CATEGORIES[0])
-  const rootRef = React.useRef<HTMLDivElement | null>(null)
+  const [expandedMobile, setExpandedMobile] = React.useState<string | null>(null)
+  const rootRef = React.useRef<HTMLButtonElement | null>(null)
+  const menuRef = React.useRef<HTMLDivElement | null>(null)
 
   React.useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (!rootRef.current) return
-      if (!rootRef.current.contains(e.target as Node)) setOpen(false)
+      // Only for desktop - check if click is outside both button and menu
+      if (window.innerWidth >= 640) {
+        const target = e.target as Node
+        const isInsideButton = rootRef.current?.contains(target)
+        const isInsideMenu = menuRef.current?.contains(target)
+        
+        if (!isInsideButton && !isInsideMenu) {
+          setOpen(false)
+        }
+      }
     }
     function onEsc(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false)
@@ -101,13 +111,11 @@ export default function MenuButton() {
 
       {open && (
         <>
-          {/* Backdrop */}
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          
-          {/* Menu - positioned relative to header */}
+          {/* Desktop Menu */}
           <div
+            ref={menuRef}
             role="menu"
-            className="absolute left-0 right-0 top-full mt-4 z-50"
+            className="hidden sm:block absolute left-0 right-0 top-full mt-4 z-50"
           >
             <div className="rounded border-2 border-indigo-600 bg-white shadow-lg p-8">
               <div className="flex">
@@ -156,6 +164,88 @@ export default function MenuButton() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile Menu - Full Screen */}
+          <div
+            role="menu"
+            className="sm:hidden fixed inset-0 z-50 bg-white overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4">
+              <div className="flex items-center gap-2">
+                <img src="/icons/grid.svg" alt="" className="h-6 w-6" />
+                <span className="text-lg font-semibold">Каталог</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded"
+                aria-label="Закрити"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Categories List */}
+            <div className="px-4 py-2">
+              {CATEGORIES.map((c) => {
+                const isExpanded = expandedMobile === c.key
+                const subs = SUBCATEGORIES[c.key] || []
+                
+                return (
+                  <div key={c.key}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedMobile(isExpanded ? null : c.key)}
+                      className={cn(
+                        'w-full flex items-center gap-3 rounded px-3 py-3 text-left',
+                        isExpanded ? 'bg-indigo-50' : ''
+                      )}
+                    >
+                      <img src={c.icon} alt="" className="h-6 w-6" />
+                      <span className="text-base font-normal text-brand-black">{c.label}</span>
+                    </button>
+
+                    {/* Expanded Subcategories */}
+                    {isExpanded && (
+                      <div className="px-3 pb-4 pt-2 space-y-4">
+                        {subs.map((sec) => (
+                          <div key={sec.title}>
+                            <div className="font-semibold text-base text-brand-black mb-3">
+                              {sec.title}
+                            </div>
+                            <ul className="space-y-3">
+                              {sec.items.map((item) => (
+                                <li key={item}>
+                                  <a
+                                    href="#"
+                                    className="text-base text-gray-400 hover:text-indigo-600"
+                                    onClick={() => setOpen(false)}
+                                  >
+                                    {item}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                            <a
+                              href="#"
+                              className="mt-3 inline-block text-base text-indigo-600 hover:underline"
+                              onClick={() => setOpen(false)}
+                            >
+                              Дивитися більше
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </>
