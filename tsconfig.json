@@ -15,8 +15,10 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "src",
     "paths": {
+      "@ui": ["ui"],
       "@ui/*": ["ui/*"],
       "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
       "@lib/*": ["lib/*"]
     }
   },

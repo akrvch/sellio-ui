@@ -25,17 +25,19 @@ function CrumbLink({
   variant: 'title' | 'body'
 }) {
   const base =
-    'inline-flex items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2'
+    'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2'
   const interactive = 'hover:underline active:underline active:text-indigo-600'
   const disabled = 'text-gray-400 pointer-events-none cursor-default'
   const size = variant === 'title' ? 'text-[16px] font-bold' : 'text-[16px]'
-  const color = 'text-brand-black'
+  const color = isCurrent ? 'text-indigo-600 underline decoration-1 underline-offset-4' : 'text-brand-black'
+  const display = isCurrent ? 'block whitespace-nowrap lg:truncate' : 'inline-block whitespace-nowrap'
 
   const className = cn(
     base,
     size,
     color,
-    !item.disabled && interactive,
+    display,
+    !item.disabled && !isCurrent && interactive,
     item.disabled && disabled,
   )
 
@@ -62,13 +64,16 @@ export default function Breadcrumbs({
 }: BreadcrumbsProps) {
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-2 text-brand-black">
+      <ol className="flex items-center gap-2 text-brand-black overflow-x-auto lg:overflow-hidden scrollbar-hide">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           return (
             <li
               key={`${item.label}-${index}`}
-              className="inline-flex items-center gap-2"
+              className={cn(
+                "inline-flex items-center gap-2",
+                isLast ? "min-w-0 lg:flex-1" : "flex-shrink-0"
+              )}
             >
               <CrumbLink item={item} isCurrent={isLast} variant={variant} />
               {!isLast && (

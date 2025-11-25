@@ -7,6 +7,16 @@ html, body, #root {
   height: 100%;
 }
 
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Tailwind classes can be applied directly in markup to avoid unknown at-rules in some editors */
 
 
