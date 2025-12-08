@@ -23,9 +23,7 @@ export default React.forwardRef<HTMLInputElement, InputProps>(function Input(
   const border = isInvalid
     ? 'border-red-600'
     : 'border-gray-500 hover:border-brand-black'
-  const ring = isInvalid
-    ? 'focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2'
-    : 'focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-1'
+  const ring = ''
   const colors = disabled
     ? 'bg-gray-100 text-gray-500 placeholder:text-gray-600'
     : 'bg-white text-brand-black placeholder:text-gray-600'

@@ -19,7 +19,9 @@
       "@ui/*": ["ui/*"],
       "@components/*": ["components/*"],
       "@pages/*": ["pages/*"],
-      "@lib/*": ["lib/*"]
+      "@lib/*": ["lib/*"],
+      "@contexts": ["contexts"],
+      "@contexts/*": ["contexts/*"]
     }
   },
   "include": ["src", "vite-env.d.ts"]
