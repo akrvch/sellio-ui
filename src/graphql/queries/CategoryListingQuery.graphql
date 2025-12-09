@@ -1,0 +1,38 @@
+query CategoryListingQuery(
+  $alias: String!
+  $limit: Int
+  $offset: Int
+  $sort: ProductSort
+) {
+  categoryListing(alias: $alias, limit: $limit, offset: $offset, sort: $sort) {
+    category {
+      id
+      name
+      alias
+      url
+      path {
+        name
+        url
+      }
+      childCategories {
+        id
+        name
+        alias
+        url
+      }
+    }
+    page {
+      products {
+        id
+        name
+        price
+        discountedPrice
+        discountPercent
+        company {
+          name
+        }
+      }
+    }
+  }
+}
+

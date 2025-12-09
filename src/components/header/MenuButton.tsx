@@ -1,65 +1,73 @@
 import React from 'react'
+import { useQuery } from '@apollo/client/react'
 import { cn } from '@lib/cn'
+import GetMenuQuery from '@graphql/queries/GetMenuQuery.graphql'
 
 type Category = {
   key: string
   label: string
-  icon: string // path to icon
+  icon: string
+  url: string
 }
 
-const CATEGORIES: Category[] = [
-  { key: 'tech', label: 'Техніка та електроніка', icon: '/icons/categories/tech.svg' },
-  { key: 'beauty', label: 'Краса та здоровʼя', icon: '/icons/categories/beauty.svg' },
-  { key: 'clothes', label: 'Одяг та взуття', icon: '/icons/categories/clothes.svg' },
-  { key: 'auto', label: 'Все для авто', icon: '/icons/categories/auto.svg' },
-  { key: 'accessories', label: 'Аксесуари та прикраси', icon: '/icons/categories/accessories.svg' },
-  { key: 'pets', label: 'Зоотовари', icon: '/icons/categories/pets.svg' },
-  { key: 'kids', label: 'Товари для дітей', icon: '/icons/categories/kids.svg' },
-  { key: 'sport', label: 'Спорт та відпочинок', icon: '/icons/categories/sport.svg' },
-  { key: 'office', label: 'Канцелярія та книги', icon: '/icons/categories/office.svg' },
-]
+type ChildCategory = {
+  id: number
+  name: string
+  alias: string
+  url: string
+  childCategories?: ChildCategory[]
+}
 
-type SubSection = { title: string; items: string[] }
-type SubMap = Record<string, SubSection[]>
+type MenuCategory = {
+  id: number
+  alias: string
+  name: string
+  url: string
+  childCategories: ChildCategory[]
+}
 
-const SUBCATEGORIES: SubMap = {
-  tech: [
-    { title: 'Аудіо техніка та аксесуари', items: ['Навушники та гарнітури', 'Кабелі для електроніки', 'Портативні колонки', 'Акустичні системи', 'Плеєри MP3, MP4'] },
-    { title: 'Телефони та аксесуари', items: ['Мобільні телефони, смартфони', 'Годинники та фітнес браслети', 'Аксесуари для мобільних телефонів', 'Комплектуючі', 'Стаціонарні телефони'] },
-    { title: 'Зарядні станції та павербанки', items: ['Павербанки', 'Комплектуючі для павербанків', 'Зарядні станції'] },
-  ],
-  beauty: [
-    { title: 'Краса та здоровʼя', items: ['Догляд за волоссям', 'Стайлери', 'Епілятори', 'Масажери', 'Ваги'] },
-  ],
-  clothes: [
-    { title: 'Одяг', items: ['Чоловічий одяг', 'Жіночий одяг', 'Взуття', 'Аксесуари'] },
-  ],
-  auto: [
-    { title: 'Авто', items: ['Автоаксесуари', 'Електроніка для авто', 'Шини та диски', 'Запчастини'] },
-  ],
-  accessories: [
-    { title: 'Прикраси', items: ['Годинники', 'Сережки', 'Каблучки', 'Браслети'] },
-  ],
-  pets: [
-    { title: 'Зоотовари', items: ['Корма', 'Лотки та наповнювачі', 'Аксесуари', 'Ласощі'] },
-  ],
-  kids: [
-    { title: 'Для дітей', items: ['Іграшки', 'Дитячий транспорт', 'Догляд та гігієна', 'Коляски та автокрісла'] },
-  ],
-  sport: [
-    { title: 'Спорт', items: ['Фітнес', 'Туризм', 'Велоспорт', 'Спортивний одяг'] },
-  ],
-  office: [
-    { title: 'Канцелярія та книги', items: ['Ноутбуки та аксесуари', 'Книги', 'Рюкзаки та сумки', 'Офісна техніка'] },
-  ],
+type MenuData = {
+  menu: MenuCategory[]
+}
+
+// Мапінг іконок за id категорії (в порядку оригінальних моканих даних)
+const ICON_MAP: Record<number, string> = {
+  1: 'tech',
+  2: 'beauty',
+  3: 'clothes',
+  4: 'auto',
+  5: 'accessories',
+  6: 'pets',
+  7: 'kids',
+  8: 'sport',
+  9: 'office',
 }
 
 export default function MenuButton() {
+  const { data, loading, error } = useQuery<MenuData>(GetMenuQuery)
   const [open, setOpen] = React.useState(false)
-  const [active, setActive] = React.useState<Category>(CATEGORIES[0])
+  const [active, setActive] = React.useState<Category | null>(null)
   const [expandedMobile, setExpandedMobile] = React.useState<string | null>(null)
   const rootRef = React.useRef<HTMLButtonElement | null>(null)
   const menuRef = React.useRef<HTMLDivElement | null>(null)
+
+  // Map GraphQL data to categories format
+  const categories: Category[] = React.useMemo(() => {
+    if (!data?.menu) return []
+    return data.menu.map((item: MenuCategory) => ({
+      key: item.alias,
+      label: item.name,
+      icon: `/icons/categories/${ICON_MAP[item.id] || item.alias}.svg`,
+      url: item.url,
+    }))
+  }, [data])
+
+  // Set first category as active when data loads
+  React.useEffect(() => {
+    if (categories.length > 0 && !active) {
+      setActive(categories[0])
+    }
+  }, [categories, active])
 
   React.useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -96,7 +104,7 @@ export default function MenuButton() {
         onClick={() => {
           setOpen((v) => {
             const next = !v
-            if (next) setActive(CATEGORIES[0])
+            if (next && categories.length > 0) setActive(categories[0])
             return next
           })
         }}
@@ -110,7 +118,7 @@ export default function MenuButton() {
         <span className="font-semibold hidden sm:inline">Каталог</span>
       </button>
 
-      {open && (
+      {open && !loading && categories.length > 0 && active && (
         <>
           {/* Desktop Menu */}
           <div
@@ -119,10 +127,10 @@ export default function MenuButton() {
             className="hidden sm:block absolute left-0 right-0 top-full mt-4 z-50"
           >
             <div className="rounded border-2 border-indigo-600 bg-white shadow-lg p-8">
-              <div className="flex">
-                <div className="w-72 border-r border-gray-200 pr-8">
-                  <ul className="max-h-[60vh] overflow-auto py-1">
-                    {CATEGORIES.map((c) => {
+              <div className="flex h-[400px] overflow-hidden">
+                <div className="w-72 border-r border-gray-200 pr-8 overflow-y-auto scrollbar-indigo">
+                  <ul className="py-1">
+                    {categories.map((c) => {
                       const isActive = c.key === active.key
                       return (
                         <li key={c.key}>
@@ -143,25 +151,44 @@ export default function MenuButton() {
                     })}
                   </ul>
                 </div>
-                <div className="flex-1 pl-4">
-                  <div className="grid grid-cols-3 gap-6 max-h-[60vh] overflow-auto pr-2">
-                    {(SUBCATEGORIES[active.key] || []).map((sec) => (
-                      <div key={sec.title}>
-                        <div className="font-semibold mb-2">{sec.title}</div>
-                        <ul className="space-y-2">
-                          {sec.items.map((item) => (
-                            <li key={item}>
-                              <a href="#" className="text-brand-black hover:underline">
-                                {item}
+                <div className="flex-1 pl-4 overflow-y-auto pr-2 min-w-0 scrollbar-indigo">
+                  <div className="grid grid-cols-3 gap-6 pb-2">
+                    {data?.menu
+                      .find((m: MenuCategory) => m.alias === active.key)
+                      ?.childCategories.map((child: ChildCategory) => (
+                        <div key={child.alias} className="min-w-0">
+                          <div className="font-semibold mb-2 break-words">{child.name}</div>
+                          {child.childCategories && child.childCategories.length > 0 ? (
+                            <>
+                              <ul className="space-y-2">
+                                {child.childCategories.map((subChild: ChildCategory) => (
+                                  <li key={subChild.alias}>
+                                    <a
+                                      href={subChild.url}
+                                      className="text-brand-black hover:underline break-words"
+                                    >
+                                      {subChild.name}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                              <a
+                                href={child.url}
+                                className="mt-2 block text-indigo-600 hover:underline break-words"
+                              >
+                                Дивитися більше
                               </a>
-                            </li>
-                          ))}
-                        </ul>
-                        <a href="#" className="mt-2 inline-block text-indigo-600 hover:underline">
-                          Дивитися більше
-                        </a>
-                      </div>
-                    ))}
+                            </>
+                          ) : (
+                            <a
+                              href={child.url}
+                              className="text-brand-black hover:underline break-words"
+                            >
+                              Дивитися всі
+                            </a>
+                          )}
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -194,10 +221,11 @@ export default function MenuButton() {
 
             {/* Mobile Categories List */}
             <div className="px-4 py-2">
-              {CATEGORIES.map((c) => {
+              {categories.map((c) => {
                 const isExpanded = expandedMobile === c.key
-                const subs = SUBCATEGORIES[c.key] || []
-                
+                const childCategories =
+                  data?.menu.find((m: MenuCategory) => m.alias === c.key)?.childCategories || []
+
                 return (
                   <div key={c.key}>
                     <button
@@ -213,33 +241,45 @@ export default function MenuButton() {
                     </button>
 
                     {/* Expanded Subcategories */}
-                    {isExpanded && (
+                    {isExpanded && childCategories.length > 0 && (
                       <div className="px-3 pb-4 pt-2 space-y-4">
-                        {subs.map((sec) => (
-                          <div key={sec.title}>
+                        {childCategories.map((child: ChildCategory) => (
+                          <div key={child.alias}>
                             <div className="font-semibold text-base text-brand-black mb-3">
-                              {sec.title}
+                              {child.name}
                             </div>
-                            <ul className="space-y-3">
-                              {sec.items.map((item) => (
-                                <li key={item}>
-                                  <a
-                                    href="#"
-                                    className="text-base text-gray-400 hover:text-indigo-600"
-                                    onClick={() => setOpen(false)}
-                                  >
-                                    {item}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                            <a
-                              href="#"
-                              className="mt-3 inline-block text-base text-indigo-600 hover:underline"
-                              onClick={() => setOpen(false)}
-                            >
-                              Дивитися більше
-                            </a>
+                            {child.childCategories && child.childCategories.length > 0 ? (
+                              <>
+                                <ul className="space-y-3">
+                                  {child.childCategories.map((subChild: ChildCategory) => (
+                                    <li key={subChild.alias}>
+                                      <a
+                                        href={subChild.url}
+                                        className="text-base text-gray-400 hover:text-indigo-600"
+                                        onClick={() => setOpen(false)}
+                                      >
+                                        {subChild.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                                <a
+                                  href={child.url}
+                                  className="mt-3 inline-block text-base text-indigo-600 hover:underline"
+                                  onClick={() => setOpen(false)}
+                                >
+                                  Дивитися більше
+                                </a>
+                              </>
+                            ) : (
+                              <a
+                                href={child.url}
+                                className="text-base text-gray-400 hover:text-indigo-600 block"
+                                onClick={() => setOpen(false)}
+                              >
+                                Дивитися всі
+                              </a>
+                            )}
                           </div>
                         ))}
                       </div>

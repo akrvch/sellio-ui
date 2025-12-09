@@ -1,0 +1,21 @@
+query GetMenuQuery {
+  menu {
+    id
+    alias
+    name
+    url
+    childCategories {
+      id
+      name
+      alias
+      url
+      childCategories {
+        id
+        name
+        alias
+        url
+      }
+    }
+  }
+}
+

@@ -17,6 +17,31 @@ html, body, #root {
   display: none;
 }
 
+/* Custom scrollbar with indigo color */
+.scrollbar-indigo::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-indigo::-webkit-scrollbar-track {
+  background: #F2F2F1;
+  border-radius: 4px;
+}
+
+.scrollbar-indigo::-webkit-scrollbar-thumb {
+  background: #7574FF;
+  border-radius: 4px;
+}
+
+.scrollbar-indigo::-webkit-scrollbar-thumb:hover {
+  background: #818BFC;
+}
+
+/* Firefox */
+.scrollbar-indigo {
+  scrollbar-width: thin;
+  scrollbar-color: #7574FF #F2F2F1;
+}
+
 /* Tailwind classes can be applied directly in markup to avoid unknown at-rules in some editors */
 
 
