@@ -34,6 +34,7 @@ type CategoryData = {
 type ProductData = {
   id: number
   name: string
+  url: string
   price: number
   discountedPrice?: number
   discountPercent?: number
@@ -83,6 +84,7 @@ export default function CategoryPage() {
     return products.map((product: ProductData) => ({
       id: product.id.toString(),
       name: product.name,
+      url: product.url,
       price: product.discountedPrice || product.price,
       oldPrice: product.discountedPrice ? product.price : undefined,
       discount: product.discountPercent,

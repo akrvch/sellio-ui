@@ -16,6 +16,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec1',
     name: 'Чохол Armorstandart Голубий',
+    url: '/p/rec1-chohol-armorstandart-golubyj',
     image: 'https://via.placeholder.com/200',
     price: 189,
     inStock: true,
@@ -23,6 +24,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec2',
     name: 'Чохол Armorstandart Зелений',
+    url: '/p/rec2-chohol-armorstandart-zelenyj',
     image: 'https://via.placeholder.com/200',
     price: 189,
     inStock: true,
@@ -30,6 +32,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec3',
     name: 'Чохол Armorstandart Сірий',
+    url: '/p/rec3-chohol-armorstandart-siryj',
     image: 'https://via.placeholder.com/200',
     price: 189,
     inStock: true,
@@ -37,6 +40,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec4',
     name: 'Бездротова зарядка Baseus 15W',
+    url: '/p/rec4-baseus-wireless-charger',
     image: 'https://via.placeholder.com/200',
     price: 599,
     inStock: true,
@@ -44,6 +48,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec5',
     name: 'Павербанк Xiaomi 20000mAh',
+    url: '/p/rec5-xiaomi-powerbank',
     image: 'https://via.placeholder.com/200',
     price: 899,
     oldPrice: 1299,
@@ -53,6 +58,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: 'rec6',
     name: 'Кабель USB-C 2м Anker',
+    url: '/p/rec6-anker-usbc-cable',
     image: 'https://via.placeholder.com/200',
     price: 299,
     inStock: true,

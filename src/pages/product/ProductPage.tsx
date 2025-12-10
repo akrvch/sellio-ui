@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@apollo/client/react'
 import BasePage from '@components/base-page'
 import DeliveryOptions from '@components/delivery-options'
 import PaymentOptions from '@components/payment-options'
@@ -6,102 +8,145 @@ import AccessoriesSection from '@components/accessories-section'
 import SimilarProductsSection from '@components/similar-products-section'
 import { type Product } from '@components/product-card'
 import { Breadcrumbs, Tabs, Button, Text } from '@ui'
+import ProductViewQuery from '@graphql/queries/ProductViewQuery.graphql'
 
-// Mock data - в майбутньому тут буде GraphQL запит
-const PRODUCT_DATA = {
-  id: '14567439',
-  name: 'Навушники вкладиші бездротові Apple AirPods with Charging Case (MV7N2RU/A/MV7N2TY/A)',
-  article: '14567439',
-  price: 4999,
-  inStock: true,
-  seller: {
-    name: 'Family Bags',
-    location: 'м.Чернігів',
-    link: '#'
-  },
-  rating: 5,
-  reviewsCount: 43,
-  images: [
-    'https://via.placeholder.com/600x600',
-    'https://via.placeholder.com/600x600',
-    'https://via.placeholder.com/600x600',
-    'https://via.placeholder.com/600x600',
-  ],
-  delivery: {
-    novaPoshta: [
-      { type: 'До відділення', date: '17 Жовтня', price: 0 },
-      { type: 'У поштомат', date: '17 Жовтня', price: 0 },
-      { type: 'Кур\'єр Нова пошта', date: '17 Жовтня', price: 130 },
-    ],
-    ukrposhta: [
-      { type: 'До відділення Укрпошта', date: '22 Жовтня', price: 1 },
-    ]
-  },
-  payment: {
-    online: ['Visa', 'MasterCard', 'ApplePay', 'GooglePay'],
-    postpay: 'У відділенні при отриманні товару'
+// Payment type to icon mapping
+const PAYMENT_ICON_MAP: Record<string, string> = {
+  card: '/icons/payment_delivery/online-payment.svg',
+  bank_account: '/icons/payment_delivery/online-payment.svg',
+  cash_on_delivery: '/icons/payment_delivery/cash-on-delivery.svg',
+}
+
+// Delivery type to icon mapping
+const DELIVERY_ICON_MAP: Record<string, string> = {
+  nova_poshta: '/icons/payment_delivery/nova-poshta.svg',
+  ukrposhta: '/icons/payment_delivery/ukrposhta.svg',
+  meest: '/icons/payment_delivery/nova-poshta.svg',
+  pickup: '/icons/payment_delivery/nova-poshta.svg',
+}
+
+type ProductViewData = {
+  productView: {
+    id: number
+    name: string
+    price: number
+    description: string
+    discountPercent: number | null
+    discountedPrice: number | null
+    url: string
+    category: {
+      id: number
+      name: string
+      url: string
+      path: Array<{
+        id: number
+        name: string
+        url: string
+      }>
+    }
+    company: {
+      id: number
+      name: string
+    }
+    paymentOptions: Array<{
+      id: number
+      name: string
+      type: string
+    }>
+    deliveryOptions: Array<{
+      id: number
+      name: string
+      type: string
+    }>
   }
 }
 
 const ProductPage: React.FC = () => {
+  const { productId } = useParams<{ productId: string }>()
   const [selectedImage, setSelectedImage] = useState(0)
   const [activeTab, setActiveTab] = useState('about')
 
-  // Prepare delivery providers data
-  const deliveryProviders = [
-    {
-      icon: '/icons/payment_delivery/nova-poshta.svg',
-      title: 'Нова Пошта',
-      options: PRODUCT_DATA.delivery.novaPoshta,
-    },
-    {
-      icon: '/icons/payment_delivery/ukrposhta.svg',
-      title: 'Укрпошта',
-      options: PRODUCT_DATA.delivery.ukrposhta,
-    },
-  ]
+  // Extract product ID from URL (format: "2-navushniki-sony-1000xm5")
+  const numericProductId = productId ? parseInt(productId.split('-')[0]) : 0
 
-  // Prepare payment methods data
-  const paymentMethods = [
-    {
-      icon: '/icons/payment_delivery/online-payment.svg',
-      title: 'Онлайн оплата',
-      description: PRODUCT_DATA.payment.online.join(', '),
-    },
-    {
-      icon: '/icons/payment_delivery/cash-on-delivery.svg',
-      title: 'Післяплата',
-      description: PRODUCT_DATA.payment.postpay,
-    },
-  ]
+  const { loading, error, data } = useQuery<ProductViewData>(ProductViewQuery, {
+    variables: { productId: numericProductId },
+    skip: !numericProductId,
+  })
+
+  if (loading) {
+    return (
+      <BasePage>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Text variant="title-2" color="muted">Завантаження...</Text>
+        </div>
+      </BasePage>
+    )
+  }
+
+  if (error || !data?.productView) {
+    return (
+      <BasePage>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Text variant="title-2" color="muted">
+            {error ? 'Помилка завантаження товару' : 'Товар не знайдено'}
+          </Text>
+          {error && (
+            <Text variant="body-1" color="muted">
+              {error.message}
+            </Text>
+          )}
+        </div>
+      </BasePage>
+    )
+  }
+
+  const product = data.productView
+
+  // Prepare delivery providers data from GraphQL
+  const deliveryProviders = product.deliveryOptions.map((option: any) => ({
+    icon: DELIVERY_ICON_MAP[option.type] || '/icons/payment_delivery/nova-poshta.svg',
+    title: option.name,
+    options: [
+      { type: 'До відділення', date: 'Уточніть у продавця', price: 0 },
+    ],
+  }))
+
+  // Prepare payment methods data from GraphQL
+  const paymentMethods = product.paymentOptions.map((option: any) => ({
+    icon: PAYMENT_ICON_MAP[option.type] || '/icons/payment_delivery/online-payment.svg',
+    title: option.name,
+    description: option.type === 'cash_on_delivery' ? 'У відділенні при отриманні товару' : 'Онлайн оплата',
+  }))
 
   // Mock accessories data
   const accessories: Product[] = [
-    { id: '1', name: 'Чохол Armorstandart Голубий', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '2', name: 'Чохол Armorstandart Зелений', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '3', name: 'Чохол Armorstandart Сірий', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '4', name: 'Чохол Armorstandart Салатовий', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '5', name: 'Чохол Armorstandart Жовтий', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '6', name: 'Чохол Armorstandart Синій', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '1', name: 'Чохол Armorstandart Голубий', url: '/p/1-chohol-armorstandart-golubyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '2', name: 'Чохол Armorstandart Зелений', url: '/p/2-chohol-armorstandart-zelenyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '3', name: 'Чохол Armorstandart Сірий', url: '/p/3-chohol-armorstandart-siryj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '4', name: 'Чохол Armorstandart Салатовий', url: '/p/4-chohol-armorstandart-salatowyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '5', name: 'Чохол Armorstandart Жовтий', url: '/p/5-chohol-armorstandart-zhovtyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '6', name: 'Чохол Armorstandart Синій', url: '/p/6-chohol-armorstandart-synij', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
   ]
 
   // Mock similar products data
   const similarProducts: Product[] = [
-    { id: '7', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', image: 'https://via.placeholder.com/200', price: 444, inStock: true },
-    { id: '8', name: 'Бездротові навушники Bluetooth Headset M26', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, discount: 50, inStock: true },
-    { id: '9', name: 'Бездротові сенсорні навушники із цифровим зарядним кейсом', image: 'https://via.placeholder.com/200', price: 549, inStock: true, isFavorite: true },
-    { id: '10', name: 'Навушники вкладиші бездротові Apple AirPods', image: 'https://via.placeholder.com/200', price: 4999, inStock: true },
-    { id: '11', name: 'Навушники бездротові Realme Buds T300 Black', image: 'https://via.placeholder.com/200', price: 600, oldPrice: 1200, discount: 50, inStock: true },
-    { id: '12', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, inStock: false },
+    { id: '7', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/7-bezdrotovi-sensorni-navushnyky', image: 'https://via.placeholder.com/200', price: 444, inStock: true },
+    { id: '8', name: 'Бездротові навушники Bluetooth Headset M26', url: '/p/8-bezdrotovi-navushnyky-m26', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, discount: 50, inStock: true },
+    { id: '9', name: 'Бездротові сенсорні навушники із цифровим зарядним кейсом', url: '/p/9-bezdrotovi-navushnyky-z-kejsom', image: 'https://via.placeholder.com/200', price: 549, inStock: true, isFavorite: true },
+    { id: '10', name: 'Навушники вкладиші бездротові Apple AirPods', url: '/p/10-apple-airpods', image: 'https://via.placeholder.com/200', price: 4999, inStock: true },
+    { id: '11', name: 'Навушники бездротові Realme Buds T300 Black', url: '/p/11-realme-buds-t300', image: 'https://via.placeholder.com/200', price: 600, oldPrice: 1200, discount: 50, inStock: true },
+    { id: '12', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/12-bluetooth-a6s-chorni', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, inStock: false },
   ]
 
+  // Build breadcrumbs from category path
   const breadcrumbItems = [
     { label: 'Головна', href: '/' },
-    { label: 'Для вас', href: '/for-you' },
-    { label: 'Техніка та електроніка', href: '/category/tech' },
-    { label: 'Аудіо та аксесуари', href: '/category/audio' },
-    { label: 'Навушники та гарнітури', href: '/category/headphones' },
-    { label: PRODUCT_DATA.name, href: '#', current: true },
+    ...product.category.path.slice(1).map((cat: any) => ({
+      label: cat.name,
+      href: cat.url.replace('http://localhost:5173', ''),
+    })),
+    { label: product.name, href: '#', current: true },
   ]
 
   const tabs = [
@@ -143,30 +188,30 @@ const ProductPage: React.FC = () => {
                   </svg>
                 </button>
                 <img 
-                  src={PRODUCT_DATA.images[selectedImage]} 
-                  alt={PRODUCT_DATA.name}
+                  src="https://via.placeholder.com/600x600" 
+                  alt={product.name}
                   className="max-w-full max-h-full object-contain p-4"
                 />
               </div>
 
               {/* Thumbnails - Horizontal (hidden on mobile) */}
               <div className="hidden lg:grid grid-cols-4 gap-2">
-                {PRODUCT_DATA.images.map((image, index) => (
+                {[1, 2, 3, 4].map((index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => setSelectedImage(index - 1)}
                     className={`relative aspect-square bg-white rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index 
+                      selectedImage === index - 1
                         ? 'border-indigo-600' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <img 
-                      src={image} 
-                      alt={`${PRODUCT_DATA.name} ${index + 1}`}
+                      src="https://via.placeholder.com/200" 
+                      alt={`${product.name} ${index}`}
                       className="w-full h-full object-contain p-1"
                     />
-                    {index === 3 && (
+                    {index === 4 && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
                         <Text variant="body-2" className="text-white font-semibold text-xs">
                           Та ще 2
@@ -179,16 +224,16 @@ const ProductPage: React.FC = () => {
               
               {/* Pagination Dots (visible on mobile) */}
               <div className="flex justify-center gap-2 lg:hidden">
-                {PRODUCT_DATA.images.map((_, index) => (
+                {[1, 2, 3, 4].map((index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => setSelectedImage(index - 1)}
                     className={`w-2 h-2 rounded-full transition-colors ${
-                      selectedImage === index 
+                      selectedImage === index - 1
                         ? 'bg-brand-indigo-600' 
                         : 'bg-gray-300'
                     }`}
-                    aria-label={`Перейти до зображення ${index + 1}`}
+                    aria-label={`Перейти до зображення ${index}`}
                   />
                 ))}
               </div>
@@ -199,13 +244,13 @@ const ProductPage: React.FC = () => {
           <div className="space-y-6 order-2 lg:order-2 min-w-0">
             {/* Title */}
             <Text as="h1" variant="large-title-3" className="break-words">
-              {PRODUCT_DATA.name}
+              {product.name}
             </Text>
 
             {/* Article & Stock - в один рядок */}
             <div className="flex items-center justify-between">
               <Text variant="body-1">
-                Артикул: {PRODUCT_DATA.article}
+                Артикул: {product.id}
               </Text>
               <Text variant="body-1" className="text-green-400">В наявності</Text>
             </div>
@@ -227,7 +272,7 @@ const ProductPage: React.FC = () => {
                       <path d="M10 18a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" strokeWidth="1.5"/>
                       <path d="M10 14v-4m0-4h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
-                    <Text as="span" variant="body-1">{PRODUCT_DATA.reviewsCount} відгуки</Text>
+                    <Text as="span" variant="body-1">0 відгуки</Text>
                   </button>
                 </div>
               </div>
@@ -235,10 +280,9 @@ const ProductPage: React.FC = () => {
               {/* Seller */}
               <Text variant="body-1" className="lg:order-1">
                 <Text as="span" color="muted">Продавець: </Text>
-                <a href={PRODUCT_DATA.seller.link} className="text-brand-indigo-600 hover:underline">
-                  {PRODUCT_DATA.seller.name}
-                </a>
-                <Text as="span" color="muted"> {PRODUCT_DATA.seller.location}</Text>
+                <span className="text-brand-indigo-600">
+                  {product.company.name}
+                </span>
               </Text>
             </div>
 
@@ -246,9 +290,21 @@ const ProductPage: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               {/* Price & Favorite */}
               <div className="flex items-center justify-between lg:justify-start lg:gap-4">
-                <Text as="span" variant="large-title-2">
-                  {PRODUCT_DATA.price} ₴
-                </Text>
+                <div className="flex flex-col">
+                  <Text as="span" variant="large-title-2">
+                    {product.discountedPrice || product.price} ₴
+                  </Text>
+                  {product.discountedPrice && (
+                    <div className="flex items-center gap-2">
+                      <Text as="span" variant="body-1" className="line-through text-brand-gray-400">
+                        {product.price} ₴
+                      </Text>
+                      <span className="bg-brand-red-100 text-brand-red-600 px-2 py-0.5 rounded text-xs font-semibold">
+                        -{product.discountPercent}%
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <button 
                   className="lg:hidden p-2 hover:bg-gray-50 rounded-full transition"
                   aria-label="Додати в обране"

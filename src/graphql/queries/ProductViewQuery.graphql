@@ -1,0 +1,36 @@
+query ProductViewQuery($productId: Int!) {
+  productView(id: $productId) {
+    id
+    name
+    price
+    description
+    discountPercent
+    discountedPrice
+    url
+    category {
+      id
+      name
+      url
+      path {
+        id
+        name
+        url
+      }
+    }
+    company {
+      id
+      name
+    }
+    paymentOptions {
+      id
+      name
+      type
+    }
+    deliveryOptions {
+      id
+      name
+      type
+    }
+  }
+}
+

@@ -1,10 +1,12 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@ui'
 import { cn } from '@lib/cn'
 
 export interface Product {
   id: string
   name: string
+  url: string
   image: string
   price: number
   oldPrice?: number
@@ -21,6 +23,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const discountPercent = product.discount || 
     (product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0)
+
+  // Extract path from full URL (e.g., "http://localhost:5173/p/2-product" -> "/p/2-product")
+  const productPath = product.url.replace(/^https?:\/\/[^/]+/, '')
 
   const handleAddToCart = () => {
     // TODO: Реалізувати логіку додавання в кошик (dispatch Redux action або API call)
@@ -54,20 +59,22 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Product Image */}
-        <div className="aspect-square bg-gray-100 rounded overflow-hidden">
+        <Link to={productPath} className="block aspect-square bg-gray-100 rounded overflow-hidden">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
           />
-        </div>
+        </Link>
       </div>
 
       {/* Product Info */}
       <div className="flex-1 flex flex-col px-2 md:px-4 pb-2 md:pb-4">
-        <h3 className="text-base text-brand-black mb-3 line-clamp-2 hover:text-indigo-600 cursor-pointer min-h-[3rem]">
-          {product.name}
-        </h3>
+        <Link to={productPath}>
+          <h3 className="text-base text-brand-black mb-3 line-clamp-2 hover:text-indigo-600 cursor-pointer min-h-[3rem]">
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Stock Status */}
         <div className="mb-3">

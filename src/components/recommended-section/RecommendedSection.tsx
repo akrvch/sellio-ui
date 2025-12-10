@@ -7,6 +7,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні',
+    url: '/p/1-bluetooth-a6s-black',
     image: 'https://via.placeholder.com/200',
     price: 444,
     inStock: true,
@@ -14,6 +15,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '2',
     name: 'Бездротові навушники Bluetooth Headset M26',
+    url: '/p/2-bluetooth-headset-m26',
     image: 'https://via.placeholder.com/200',
     price: 300,
     oldPrice: 600,
@@ -23,6 +25,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '3',
     name: 'Бездротові сенсорні навушники із цифровим зарядним...',
+    url: '/p/3-wireless-headphones-case',
     image: 'https://via.placeholder.com/200',
     price: 549,
     inStock: true,
@@ -31,6 +34,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '4',
     name: 'Навушники вкладиші бездротові Apple AirPods',
+    url: '/p/4-apple-airpods',
     image: 'https://via.placeholder.com/200',
     price: 4999,
     inStock: true,
@@ -38,6 +42,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '5',
     name: 'Навушники бездротові Realme Buds T300 Black',
+    url: '/p/5-realme-buds-t300',
     image: 'https://via.placeholder.com/200',
     price: 600,
     oldPrice: 1200,
@@ -47,6 +52,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '6',
     name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні',
+    url: '/p/6-bluetooth-a6s-black-2',
     image: 'https://via.placeholder.com/200',
     price: 300,
     oldPrice: 600,
@@ -56,6 +62,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '7',
     name: 'Портативна колонка JBL Charge 5',
+    url: '/p/7-jbl-charge-5',
     image: 'https://via.placeholder.com/200',
     price: 3999,
     inStock: true,
@@ -63,6 +70,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '8',
     name: 'Смарт-годинник Samsung Galaxy Watch 6',
+    url: '/p/8-samsung-galaxy-watch-6',
     image: 'https://via.placeholder.com/200',
     price: 7999,
     oldPrice: 9999,
@@ -72,6 +80,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '9',
     name: 'Бездротова зарядка Baseus 15W',
+    url: '/p/9-baseus-wireless-charger',
     image: 'https://via.placeholder.com/200',
     price: 599,
     inStock: true,
@@ -79,6 +88,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '10',
     name: 'Павербанк Xiaomi 20000mAh',
+    url: '/p/10-xiaomi-powerbank',
     image: 'https://via.placeholder.com/200',
     price: 899,
     oldPrice: 1299,
@@ -88,6 +98,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '11',
     name: 'Кабель USB-C 2м Anker',
+    url: '/p/11-anker-usbc-cable',
     image: 'https://via.placeholder.com/200',
     price: 299,
     inStock: true,
@@ -95,6 +106,7 @@ const RECOMMENDED_PRODUCTS: Product[] = [
   {
     id: '12',
     name: 'Чохол для iPhone 15 Pro',
+    url: '/p/12-iphone-15-pro-case',
     image: 'https://via.placeholder.com/200',
     price: 499,
     inStock: true,

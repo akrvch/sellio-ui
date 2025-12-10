@@ -25,6 +25,7 @@ query CategoryListingQuery(
       products {
         id
         name
+        url
         price
         discountedPrice
         discountPercent
