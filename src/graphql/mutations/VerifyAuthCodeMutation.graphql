@@ -1,0 +1,9 @@
+mutation VerifyAuthCode($phone: String!, $code: String!) {
+  verifyAuthCode(phone: $phone, code: $code) {
+    status
+    message
+    userId
+    profileRequired
+  }
+}
+

@@ -1,0 +1,7 @@
+mutation RequestAuthCode($phone: String!) {
+  requestAuthCode(phone: $phone) {
+    status
+    message
+  }
+}
+

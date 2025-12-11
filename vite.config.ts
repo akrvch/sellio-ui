@@ -15,6 +15,9 @@ export default defineConfig({
       '@graphql': fileURLToPath(new URL('./src/graphql', import.meta.url)),
     },
   },
+  server: {
+    allowedHosts: ['sellio.local'],
+  },
 })
 
 

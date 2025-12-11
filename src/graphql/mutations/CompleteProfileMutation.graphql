@@ -1,0 +1,18 @@
+mutation CompleteProfile(
+  $firstName: String!
+  $secondName: String!
+  $lastName: String!
+  $email: String!
+) {
+  completeProfile(
+    firstName: $firstName
+    secondName: $secondName
+    lastName: $lastName
+    email: $email
+  ) {
+    status
+    message
+    userId
+  }
+}
+

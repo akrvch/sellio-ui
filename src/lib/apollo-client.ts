@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 
 const httpLink = new HttpLink({
-  uri: 'http://127.0.0.1:8080/graphql',
+  uri: 'http://sellio.local/graphql',
+  credentials: 'include', // Send cookies with requests for session management
 })
 
 const cache = new InMemoryCache({

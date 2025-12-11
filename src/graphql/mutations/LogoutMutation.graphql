@@ -1,0 +1,7 @@
+mutation Logout {
+  logout {
+    status
+    message
+  }
+}
+

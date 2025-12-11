@@ -1,0 +1,20 @@
+mutation UpdateProfile(
+  $firstName: String
+  $secondName: String
+  $lastName: String
+  $email: String
+) {
+  updateProfile(
+    firstName: $firstName
+    secondName: $secondName
+    lastName: $lastName
+    email: $email
+  ) {
+    status
+    message
+    userId
+    errorCode
+    missingFields
+  }
+}
+
