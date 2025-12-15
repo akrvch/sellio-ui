@@ -1,0 +1,51 @@
+query ThankYouPage($orderId: Int!) {
+  thankYouPage(orderId: $orderId) {
+    order {
+      id
+      fromFirstName
+      fromSecondName
+      fromLastName
+      fromEmail
+      fromPhone
+      status {
+        key
+        title
+      }
+      comment
+      dateCreated
+      cart {
+        id
+        totalAmount
+        items {
+          name
+          price
+          quantity
+        }
+      }
+      company {
+        name
+        phone
+      }
+      paymentOption {
+        name
+        type
+      }
+      deliveryOption {
+        name
+        type
+      }
+      deliveryInfo {
+        id
+        status {
+          key
+          title
+        }
+        declarationId
+        city
+        warehouse
+        fullDeliveryAddress
+      }
+    }
+  }
+}
+

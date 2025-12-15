@@ -74,7 +74,7 @@ export default function CategoryPage() {
     return categoryData.childCategories.map((child: ChildCategory) => ({
       id: child.id.toString(),
       name: child.name,
-      image: `/categories/${child.alias}.jpg`, // TODO: add image field from backend
+      image: '/product-images/product1.jpeg',
       link: child.url,
     }))
   }, [categoryData])
@@ -89,7 +89,7 @@ export default function CategoryPage() {
       oldPrice: product.discountedPrice ? product.price : undefined,
       discount: product.discountPercent,
       inStock: true, // TODO: add from backend when available
-      image: '/products/placeholder.jpg', // TODO: add from backend when available
+      image: '/product-images/product1.jpeg',
     }))
   }, [products])
 

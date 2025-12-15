@@ -1,0 +1,24 @@
+mutation AddItemToCart($productId: Int!) {
+  addItemToCart(productId: $productId) {
+    success
+    message
+    cart {
+      id
+      companyId
+      status
+      items {
+        productId
+        name
+        price
+        quantity
+        product {
+          id
+          name
+          description
+          discountedPrice
+        }
+      }
+      totalAmount
+    }
+  }
+}

@@ -131,7 +131,7 @@ export default function DeliverySection({
                         <div className="flex items-center justify-between flex-1 min-w-0">
                           <Text variant="body-2">До відділення</Text>
                           <Text variant="body-2" className="text-indigo-600 font-semibold ml-4">
-                            17 Жовтня, 0 ₴
+                            20 грудня, 90 ₴
                           </Text>
                         </div>
                       }
@@ -164,7 +164,7 @@ export default function DeliverySection({
                       <div className="flex items-center justify-between flex-1 min-w-0">
                         <Text variant="body-2">У поштомат</Text>
                         <Text variant="body-2" className="text-indigo-600 font-semibold ml-4">
-                          17 Жовтня, 0 ₴
+                          20 грудня, 90 ₴
                         </Text>
                       </div>
                     }
@@ -181,7 +181,7 @@ export default function DeliverySection({
                       <div className="flex items-center justify-between flex-1 min-w-0">
                         <Text variant="body-2">Кур'єр Нова пошта</Text>
                         <Text variant="body-2" className="text-indigo-600 font-semibold ml-4">
-                          17 Жовтня, 0 ₴
+                          20 грудня, 90 ₴
                         </Text>
                       </div>
                     }
@@ -235,7 +235,7 @@ export default function DeliverySection({
               {deliveryService === 'novaposhta' ? 'Нова Пошта' : 'Укрпошта'}
             </Text>
             <Text variant="body-1" className="text-indigo-600 font-semibold ml-auto">
-              17 Жовтня, 0 ₴
+              {deliveryService === 'novaposhta' ? '20 грудня, 90 ₴' : '21 грудня, 60 ₴'}
             </Text>
           </div>
           {deliveryService === 'novaposhta' && deliveryMethod === 'department' && selectedDepartment && (

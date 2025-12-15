@@ -1,0 +1,34 @@
+mutation CreateOrder(
+  $cartId: Int!
+  $paymentOptionId: Int!
+  $deliveryOptionId: Int!
+  $fromFirstName: String!
+  $fromSecondName: String!
+  $fromLastName: String!
+  $fromPhone: String!
+  $fromEmail: String!
+  $comment: String
+  $city: String
+  $warehouse: String
+  $fullDeliveryAddress: String
+) {
+  createOrder(
+    cartId: $cartId
+    paymentOptionId: $paymentOptionId
+    deliveryOptionId: $deliveryOptionId
+    fromFirstName: $fromFirstName
+    fromSecondName: $fromSecondName
+    fromLastName: $fromLastName
+    fromPhone: $fromPhone
+    fromEmail: $fromEmail
+    comment: $comment
+    city: $city
+    warehouse: $warehouse
+    fullDeliveryAddress: $fullDeliveryAddress
+  ) {
+    success
+    message
+    orderId
+  }
+}
+

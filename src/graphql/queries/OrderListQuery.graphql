@@ -1,0 +1,65 @@
+query OrderList($limit: Int, $offset: Int) {
+  orderList(limit: $limit, offset: $offset) {
+    id
+    fromFirstName
+    fromSecondName
+    fromLastName
+    fromEmail
+    fromPhone
+    comment
+    dateCreated
+    
+    status {
+      key
+      title
+    }
+    
+    cart {
+      id
+      totalAmount
+      createdAt
+      items {
+        productId
+        name
+        price
+        quantity
+        product {
+          id
+          url
+        }
+      }
+    }
+    
+    company {
+      id
+      name
+      email
+      phone
+    }
+    
+    paymentOption {
+      id
+      name
+      type
+    }
+    
+    deliveryOption {
+      id
+      name
+      type
+    }
+    
+    deliveryInfo {
+      id
+      status {
+        key
+        title
+      }
+      declarationId
+      city
+      warehouse
+      fullDeliveryAddress
+    }
+  }
+}
+

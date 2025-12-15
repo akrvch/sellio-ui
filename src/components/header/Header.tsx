@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { cn } from '@lib/cn'
 import { Button, Input, Text } from '@ui'
-import { useCart } from '@contexts'
+import { useCart, useFavorites } from '@contexts'
+import { useNavigate } from 'react-router-dom'
 import MenuButton from './MenuButton'
 import CartSidebar from '@components/cart-sidebar'
 import ProfileSidebar from '@components/profile-sidebar'
 
 export default function Header({ className }: { className?: string }) {
-  const [isCartOpen, setIsCartOpen] = useState(false)
+  const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const { itemsCount } = useCart()
+  const { itemsCount, isCartOpen, openCart, closeCart } = useCart()
+  const { favoritesCount } = useFavorites()
 
   return (
     <>
@@ -17,7 +19,7 @@ export default function Header({ className }: { className?: string }) {
         <div className="w-full py-0">
           {/* Desktop (≥ sm): single row */}
           <div className="hidden sm:flex items-center gap-4">
-            <a href="#" className="flex items-center gap-1">
+            <a href="/" className="flex items-center gap-1">
               <img src="/icons/logo-mark.svg" alt="logo" className="h-7 w-7" />
               <Text as="span" variant="title-2">Sell.io</Text>
             </a>
@@ -43,9 +45,20 @@ export default function Header({ className }: { className?: string }) {
               >
                 <img src="/icons/user.svg" alt="user" className="h-6 w-6" />
               </button>
-              <a href="#"><img src="/icons/heart.svg" alt="heart" className="h-6 w-6" /></a>
               <button 
-                onClick={() => setIsCartOpen(true)} 
+                onClick={() => navigate('/cabinet/favorites')} 
+                className="relative p-1 hover:bg-gray-100 rounded transition-colors"
+                aria-label="Обране"
+              >
+                <img src="/icons/heart.svg" alt="heart" className="h-6 w-6" />
+                {favoritesCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {favoritesCount > 9 ? '9+' : favoritesCount}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={openCart} 
                 className="relative"
                 aria-label="Кошик"
               >
@@ -74,9 +87,20 @@ export default function Header({ className }: { className?: string }) {
                 >
                   <img src="/icons/user.svg" alt="user" className="h-6 w-6" />
                 </button>
-                <a href="#"><img src="/icons/heart.svg" alt="heart" className="h-6 w-6" /></a>
                 <button 
-                  onClick={() => setIsCartOpen(true)} 
+                  onClick={() => navigate('/cabinet/favorites')} 
+                  className="relative p-1 hover:bg-gray-100 rounded transition-colors"
+                  aria-label="Обране"
+                >
+                  <img src="/icons/heart.svg" alt="heart" className="h-6 w-6" />
+                  {favoritesCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-brand-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {favoritesCount > 9 ? '9+' : favoritesCount}
+                    </span>
+                  )}
+                </button>
+                <button 
+                  onClick={openCart} 
                   className="relative"
                   aria-label="Кошик"
                 >
@@ -110,7 +134,7 @@ export default function Header({ className }: { className?: string }) {
       </header>
 
       {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartSidebar isOpen={isCartOpen} onClose={closeCart} />
       
       {/* Profile Sidebar */}
       <ProfileSidebar isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />

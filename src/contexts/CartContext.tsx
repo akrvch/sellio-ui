@@ -1,152 +1,302 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useLazyQuery, useMutation } from '@apollo/client/react'
+import { useAuth } from './AuthContext'
+import { UserCartsQuery } from '@graphql/queries'
+import {
+  AddItemToCartMutation,
+  UpdateCartItemQuantityMutation,
+  RemoveItemFromCartMutation,
+} from '@graphql/mutations'
 
-// Типи для товару в кошику
-export interface CartItem {
-  id: string
+// GraphQL типи для товару в кошику
+export interface CartItemProduct {
+  id: number
   name: string
-  image: string
-  price: number
+  description: string | null
+  discountedPrice: string
+}
+
+export interface CartItem {
+  productId: number
+  name: string
+  price: string
   quantity: number
-  inStock: boolean
+  product: CartItemProduct | null
+}
+
+export interface Company {
+  id: number
+  name: string
+  email: string
+  phone: string
+}
+
+export interface Cart {
+  id: number
+  companyId: number
+  userId: number | null
+  cookie: string | null
+  status: number
+  createdAt: string
+  company: Company | null
+  items: CartItem[]
+  totalAmount: string
+}
+
+// GraphQL Response Types
+interface UserCartsResponse {
+  userCarts: Cart[]
+}
+
+interface CartMutationResponse {
+  success: boolean
+  message: string
+  cart: Cart | null
+}
+
+interface AddItemToCartResponse {
+  addItemToCart: CartMutationResponse
+}
+
+interface UpdateCartItemQuantityResponse {
+  updateCartItemQuantity: CartMutationResponse
+}
+
+interface RemoveItemFromCartResponse {
+  removeItemFromCart: CartMutationResponse
 }
 
 // Типи для контексту
 interface CartContextType {
+  carts: Cart[]
   items: CartItem[]
   itemsCount: number
   totalPrice: number
-  addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
+  loading: boolean
+  isCartOpen: boolean
+  openCart: () => void
+  closeCart: () => void
+  addItem: (productId: number) => Promise<boolean>
+  removeItem: (productId: number) => Promise<boolean>
+  updateQuantity: (productId: number, quantity: number) => Promise<boolean>
   clearCart: () => void
-  isInCart: (id: string) => boolean
-  getItemQuantity: (id: string) => number
+  isInCart: (productId: number) => boolean
+  getItemQuantity: (productId: number) => number
+  refetchCart: () => Promise<void>
 }
 
 // Створюємо контекст
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-// Ключ для localStorage
-const CART_STORAGE_KEY = 'sellio-cart'
-
-// Тестові товари для демонстрації
-const TEST_CART_ITEMS: CartItem[] = [
-  {
-    id: '14567439',
-    name: 'Навушники вкладиші бездротові Apple AirPods with Charging Case (MV7N2RU/A/MV7N2TY/A)',
-    image: 'https://via.placeholder.com/200',
-    price: 4999,
-    quantity: 1,
-    inStock: true,
-  },
-  {
-    id: '2',
-    name: 'Чохол Armorstandart Зелений',
-    image: 'https://via.placeholder.com/200',
-    price: 189,
-    quantity: 2,
-    inStock: true,
-  },
-]
-
 // Провайдер контексту
 export function CartProvider({ children }: { children: ReactNode }) {
-  // Ініціалізуємо з тестовими товарами одразу
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY)
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart)
-        // Якщо кошик порожній, повертаємо тестові товари
-        return parsedCart.length === 0 ? TEST_CART_ITEMS : parsedCart
-      }
-      // Якщо немає збереженого кошика, повертаємо тестові товари
-      return TEST_CART_ITEMS
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error)
-      return TEST_CART_ITEMS
-    }
+  const { user } = useAuth()
+  const [carts, setCarts] = useState<Cart[]>([])
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
+  // Lazy query для отримання кошика
+  const [fetchCarts, { data: cartsData, loading: cartsLoading, refetch: refetchCarts }] = useLazyQuery<UserCartsResponse>(UserCartsQuery, {
+    fetchPolicy: 'cache-and-network', // Спочатку показуємо з кешу, потім оновлюємо
   })
 
-  // Зберігаємо кошик в localStorage при кожній зміні
+  // Мутації з автоматичним refetch
+  const [addItemMutation] = useMutation<AddItemToCartResponse>(AddItemToCartMutation, {
+    refetchQueries: [{ query: UserCartsQuery }],
+  })
+  const [updateQuantityMutation] = useMutation<UpdateCartItemQuantityResponse>(UpdateCartItemQuantityMutation, {
+    refetchQueries: [{ query: UserCartsQuery }],
+  })
+  const [removeItemMutation] = useMutation<RemoveItemFromCartResponse>(RemoveItemFromCartMutation, {
+    refetchQueries: [{ query: UserCartsQuery }],
+  })
+
+  // Завантажити кошик при логіні користувача
   useEffect(() => {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error)
+    if (user) {
+      fetchCarts()
+    } else {
+      // Очищаємо кошик при логауті
+      setCarts([])
     }
-  }, [items])
+  }, [user, fetchCarts])
+
+  // Оновлюємо стан кошика при отриманні даних
+  useEffect(() => {
+    if (cartsData?.userCarts) {
+      // Фільтруємо активні кошики (status = 1) з компанією
+      const activeCarts = cartsData.userCarts.filter((c) => c.status === 1 && c.company)
+      setCarts(activeCarts)
+    }
+  }, [cartsData])
+
+  // Рефетч кошика
+  const refetchCart = async () => {
+    if (user && refetchCarts) {
+      await refetchCarts()
+    }
+  }
+
+  // Управління sidebar'ом
+  const openCart = () => setIsCartOpen(true)
+  const closeCart = () => setIsCartOpen(false)
 
   // Додати товар до кошика
-  const addItem = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id)
-      
-      if (existingItem) {
-        // Якщо товар вже є, збільшуємо кількість
-        return prevItems.map((i) =>
-          i.id === item.id
-            ? { ...i, quantity: i.quantity + quantity }
-            : i
-        )
+  const addItem = async (productId: number): Promise<boolean> => {
+    if (!user) {
+      alert('Будь ласка, увійдіть в систему для додавання товарів в кошик')
+      return false
+    }
+
+    try {
+      const { data } = await addItemMutation({
+        variables: {
+          productId,
+        },
+      })
+
+      if (data?.addItemToCart?.success) {
+        // refetchQueries автоматично оновить кошик
+        openCart() // Відкриваємо кошик після успішного додавання
+        return true
       } else {
-        // Якщо товару немає, додаємо новий
-        return [...prevItems, { ...item, quantity }]
+        console.error('Помилка додавання товару:', data?.addItemToCart?.message)
+        alert(data?.addItemToCart?.message || 'Не вдалося додати товар')
+        return false
       }
-    })
+    } catch (error) {
+      console.error('Помилка при додаванні товару:', error)
+      alert('Сталася помилка при додаванні товару')
+      return false
+    }
   }
 
   // Видалити товар з кошика
-  const removeItem = (id: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+  const removeItem = async (productId: number): Promise<boolean> => {
+    // Оптимістично оновлюємо UI - видаляємо товар локально
+    const previousCarts = carts
+    setCarts((prevCarts) =>
+      prevCarts.map((cart) => ({
+        ...cart,
+        items: cart.items.filter((item) => item.productId !== productId),
+      }))
+    )
+
+    try {
+      const { data } = await removeItemMutation({
+        variables: {
+          productId,
+        },
+      })
+
+      if (data?.removeItemFromCart?.success) {
+        // refetchQueries автоматично оновить кошик з бекенду
+        return true
+      } else {
+        console.error('Помилка видалення товару:', data?.removeItemFromCart?.message)
+        // Відновлюємо попередній стан у випадку помилки
+        setCarts(previousCarts)
+        return false
+      }
+    } catch (error) {
+      console.error('Помилка при видаленні товару:', error)
+      // Відновлюємо попередній стан у випадку помилки
+      setCarts(previousCarts)
+      return false
+    }
   }
 
   // Оновити кількість товару
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = async (productId: number, quantity: number): Promise<boolean> => {
+    // Якщо кількість 0 або менше, видаляємо товар
     if (quantity <= 0) {
-      removeItem(id)
-      return
+      return await removeItem(productId)
     }
 
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity } : item
-      )
+    // Оптимістично оновлюємо UI - змінюємо кількість локально
+    const previousCarts = carts
+    setCarts((prevCarts) =>
+      prevCarts.map((cart) => ({
+        ...cart,
+        items: cart.items.map((item) =>
+          item.productId === productId ? { ...item, quantity } : item
+        ),
+      }))
     )
+
+    try {
+      const { data } = await updateQuantityMutation({
+        variables: {
+          productId,
+          quantity,
+        },
+      })
+
+      if (data?.updateCartItemQuantity?.success) {
+        // refetchQueries автоматично оновить кошик з бекенду
+        return true
+      } else {
+        console.error('Помилка оновлення кількості:', data?.updateCartItemQuantity?.message)
+        // Відновлюємо попередній стан у випадку помилки
+        setCarts(previousCarts)
+        return false
+      }
+    } catch (error) {
+      console.error('Помилка при оновленні кількості:', error)
+      // Відновлюємо попередній стан у випадку помилки
+      setCarts(previousCarts)
+      return false
+    }
   }
 
-  // Очистити кошик
+  // Очистити кошик (локально)
   const clearCart = () => {
-    setItems([])
+    setCarts([])
   }
 
   // Перевірити, чи товар є в кошику
-  const isInCart = (id: string): boolean => {
-    return items.some((item) => item.id === id)
+  const isInCart = (productId: number): boolean => {
+    return carts.some((cart) =>
+      cart.items.some((item) => item.productId === productId)
+    )
   }
 
   // Отримати кількість конкретного товару в кошику
-  const getItemQuantity = (id: string): number => {
-    const item = items.find((i) => i.id === id)
-    return item ? item.quantity : 0
+  const getItemQuantity = (productId: number): number => {
+    let totalQuantity = 0
+    carts.forEach((cart) => {
+      const item = cart.items.find((i) => i.productId === productId)
+      if (item) {
+        totalQuantity += item.quantity
+      }
+    })
+    return totalQuantity
   }
 
   // Обчислюємо загальну кількість товарів
+  const items: CartItem[] = carts.flatMap((cart) => cart.items)
   const itemsCount = items.reduce((total, item) => total + item.quantity, 0)
 
   // Обчислюємо загальну вартість
-  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0)
+  const totalPrice = carts.reduce((total, cart) => {
+    return total + parseFloat(cart.totalAmount)
+  }, 0)
 
   const value: CartContextType = {
+    carts,
     items,
     itemsCount,
     totalPrice,
+    loading: cartsLoading, // Використовуємо лише loading від query, не від мутацій
+    isCartOpen,
+    openCart,
+    closeCart,
     addItem,
     removeItem,
     updateQuantity,
     clearCart,
     isInCart,
     getItemQuantity,
+    refetchCart,
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
@@ -155,11 +305,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 // Кастомний хук для використання контексту
 export function useCart() {
   const context = useContext(CartContext)
-  
+
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider')
   }
-  
+
   return context
 }
-

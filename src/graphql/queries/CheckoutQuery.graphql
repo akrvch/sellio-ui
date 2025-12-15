@@ -1,0 +1,37 @@
+query Checkout($cartId: Int!) {
+  checkout(cartId: $cartId) {
+    cart {
+      id
+      totalAmount
+      items {
+        productId
+        name
+        price
+        quantity
+        product {
+          id
+          name
+          description
+          discountedPrice
+        }
+      }
+      company {
+        id
+        name
+        email
+        phone
+        paymentOptions {
+          id
+          name
+          type
+        }
+        deliveryOptions {
+          id
+          name
+          type
+        }
+      }
+    }
+  }
+}
+

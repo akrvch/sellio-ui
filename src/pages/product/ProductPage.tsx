@@ -8,12 +8,13 @@ import AccessoriesSection from '@components/accessories-section'
 import SimilarProductsSection from '@components/similar-products-section'
 import { type Product } from '@components/product-card'
 import { Breadcrumbs, Tabs, Button, Text } from '@ui'
+import { useCart } from '@contexts'
 import ProductViewQuery from '@graphql/queries/ProductViewQuery.graphql'
 
 // Payment type to icon mapping
 const PAYMENT_ICON_MAP: Record<string, string> = {
   card: '/icons/payment_delivery/online-payment.svg',
-  bank_account: '/icons/payment_delivery/online-payment.svg',
+  bank_account: '/icons/bank-account.svg',
   cash_on_delivery: '/icons/payment_delivery/cash-on-delivery.svg',
 }
 
@@ -21,9 +22,17 @@ const PAYMENT_ICON_MAP: Record<string, string> = {
 const DELIVERY_ICON_MAP: Record<string, string> = {
   nova_poshta: '/icons/payment_delivery/nova-poshta.svg',
   ukrposhta: '/icons/payment_delivery/ukrposhta.svg',
-  meest: '/icons/payment_delivery/nova-poshta.svg',
-  pickup: '/icons/payment_delivery/nova-poshta.svg',
+  meest: '/icons/payment_delivery/meest.png',
+  pickup: '/icons/payment_delivery/pickup.svg',
 }
+
+// Product gallery images
+const PRODUCT_IMAGES = [
+  '/product-images/product1.jpeg',
+  '/product-images/product2.jpeg',
+  '/product-images/product3.jpeg',
+  '/product-images/product4.jpeg',
+]
 
 type ProductViewData = {
   productView: {
@@ -63,16 +72,32 @@ type ProductViewData = {
 
 const ProductPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>()
+  const { addItem, loading: cartLoading, isInCart } = useCart()
   const [selectedImage, setSelectedImage] = useState(0)
   const [activeTab, setActiveTab] = useState('about')
+  const [isAdding, setIsAdding] = useState(false)
 
   // Extract product ID from URL (format: "2-navushniki-sony-1000xm5")
   const numericProductId = productId ? parseInt(productId.split('-')[0]) : 0
+  const productInCart = isInCart(numericProductId)
 
   const { loading, error, data } = useQuery<ProductViewData>(ProductViewQuery, {
     variables: { productId: numericProductId },
     skip: !numericProductId,
   })
+
+  const handleAddToCart = async () => {
+    if (!numericProductId) return
+    
+    setIsAdding(true)
+    try {
+      await addItem(numericProductId)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -104,13 +129,17 @@ const ProductPage: React.FC = () => {
   const product = data.productView
 
   // Prepare delivery providers data from GraphQL
-  const deliveryProviders = product.deliveryOptions.map((option: any) => ({
-    icon: DELIVERY_ICON_MAP[option.type] || '/icons/payment_delivery/nova-poshta.svg',
-    title: option.name,
-    options: [
-      { type: 'До відділення', date: 'Уточніть у продавця', price: 0 },
-    ],
-  }))
+  const deliveryProviders = product.deliveryOptions.map((option: any) => {
+    const price = option.type === 'nova_poshta' ? 89 : 60
+    const date = option.type === 'nova_poshta' ? '20 грудня' : '21 грудня'
+    return {
+      icon: DELIVERY_ICON_MAP[option.type] || '/icons/payment_delivery/nova-poshta.svg',
+      title: option.name,
+      options: [
+        { type: 'До відділення', date, price },
+      ],
+    }
+  })
 
   // Prepare payment methods data from GraphQL
   const paymentMethods = product.paymentOptions.map((option: any) => ({
@@ -121,22 +150,22 @@ const ProductPage: React.FC = () => {
 
   // Mock accessories data
   const accessories: Product[] = [
-    { id: '1', name: 'Чохол Armorstandart Голубий', url: '/p/1-chohol-armorstandart-golubyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '2', name: 'Чохол Armorstandart Зелений', url: '/p/2-chohol-armorstandart-zelenyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '3', name: 'Чохол Armorstandart Сірий', url: '/p/3-chohol-armorstandart-siryj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '4', name: 'Чохол Armorstandart Салатовий', url: '/p/4-chohol-armorstandart-salatowyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '5', name: 'Чохол Armorstandart Жовтий', url: '/p/5-chohol-armorstandart-zhovtyj', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
-    { id: '6', name: 'Чохол Armorstandart Синій', url: '/p/6-chohol-armorstandart-synij', image: 'https://via.placeholder.com/200', price: 189, inStock: true },
+    { id: '1', name: 'Чохол Armorstandart Голубий', url: '/p/1-chohol-armorstandart-golubyj', image: '/product-images/product1.jpeg', price: 189, inStock: true },
+    { id: '2', name: 'Чохол Armorstandart Зелений', url: '/p/2-chohol-armorstandart-zelenyj', image: '/product-images/product1.jpeg', price: 189, inStock: true },
+    { id: '3', name: 'Чохол Armorstandart Сірий', url: '/p/3-chohol-armorstandart-siryj', image: '/product-images/product1.jpeg', price: 189, inStock: true },
+    { id: '4', name: 'Чохол Armorstandart Салатовий', url: '/p/4-chohol-armorstandart-salatowyj', image: '/product-images/product1.jpeg', price: 189, inStock: true },
+    { id: '5', name: 'Чохол Armorstandart Жовтий', url: '/p/5-chohol-armorstandart-zhovtyj', image: '/product-images/product1.jpeg', price: 189, inStock: true },
+    { id: '6', name: 'Чохол Armorstandart Синій', url: '/p/6-chohol-armorstandart-synij', image: '/product-images/product1.jpeg', price: 189, inStock: true },
   ]
 
   // Mock similar products data
   const similarProducts: Product[] = [
-    { id: '7', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/7-bezdrotovi-sensorni-navushnyky', image: 'https://via.placeholder.com/200', price: 444, inStock: true },
-    { id: '8', name: 'Бездротові навушники Bluetooth Headset M26', url: '/p/8-bezdrotovi-navushnyky-m26', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, discount: 50, inStock: true },
-    { id: '9', name: 'Бездротові сенсорні навушники із цифровим зарядним кейсом', url: '/p/9-bezdrotovi-navushnyky-z-kejsom', image: 'https://via.placeholder.com/200', price: 549, inStock: true, isFavorite: true },
-    { id: '10', name: 'Навушники вкладиші бездротові Apple AirPods', url: '/p/10-apple-airpods', image: 'https://via.placeholder.com/200', price: 4999, inStock: true },
-    { id: '11', name: 'Навушники бездротові Realme Buds T300 Black', url: '/p/11-realme-buds-t300', image: 'https://via.placeholder.com/200', price: 600, oldPrice: 1200, discount: 50, inStock: true },
-    { id: '12', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/12-bluetooth-a6s-chorni', image: 'https://via.placeholder.com/200', price: 300, oldPrice: 600, inStock: false },
+    { id: '7', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/7-bezdrotovi-sensorni-navushnyky', image: '/product-images/product1.jpeg', price: 444, inStock: true },
+    { id: '8', name: 'Бездротові навушники Bluetooth Headset M26', url: '/p/8-bezdrotovi-navushnyky-m26', image: '/product-images/product1.jpeg', price: 300, oldPrice: 600, discount: 50, inStock: true },
+    { id: '9', name: 'Бездротові сенсорні навушники із цифровим зарядним кейсом', url: '/p/9-bezdrotovi-navushnyky-z-kejsom', image: '/product-images/product1.jpeg', price: 549, inStock: true, isFavorite: true },
+    { id: '10', name: 'Навушники вкладиші бездротові Apple AirPods', url: '/p/10-apple-airpods', image: '/product-images/product1.jpeg', price: 4999, inStock: true },
+    { id: '11', name: 'Навушники бездротові Realme Buds T300 Black', url: '/p/11-realme-buds-t300', image: '/product-images/product1.jpeg', price: 600, oldPrice: 1200, discount: 50, inStock: true },
+    { id: '12', name: 'Бездротові сенсорні навушники Bluetooth A6S Чорні', url: '/p/12-bluetooth-a6s-chorni', image: '/product-images/product1.jpeg', price: 300, oldPrice: 600, inStock: false },
   ]
 
   // Build breadcrumbs from category path
@@ -188,7 +217,7 @@ const ProductPage: React.FC = () => {
                   </svg>
                 </button>
                 <img 
-                  src="https://via.placeholder.com/600x600" 
+                  src={PRODUCT_IMAGES[selectedImage]} 
                   alt={product.name}
                   className="max-w-full max-h-full object-contain p-4"
                 />
@@ -207,17 +236,10 @@ const ProductPage: React.FC = () => {
                     }`}
                   >
                     <img 
-                      src="https://via.placeholder.com/200" 
+                      src={PRODUCT_IMAGES[index - 1]} 
                       alt={`${product.name} ${index}`}
                       className="w-full h-full object-contain p-1"
                     />
-                    {index === 4 && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-                        <Text variant="body-2" className="text-white font-semibold text-xs">
-                          Та ще 2
-                        </Text>
-                      </div>
-                    )}
                   </button>
                 ))}
               </div>
@@ -316,9 +338,24 @@ const ProductPage: React.FC = () => {
               </div>
               
               {/* Buy Button */}
-              <Button size="medium" className="w-full lg:flex-1">
-                <img src="/icons/cart-white.svg" alt="" className="w-5 h-5 mr-2" />
-                Купити
+              <Button 
+                variant={productInCart ? "outlined" : "contained"}
+                size="medium" 
+                className="w-full lg:flex-1"
+                onClick={handleAddToCart}
+                disabled={isAdding || cartLoading}
+              >
+                {productInCart ? (
+                  <>
+                    <img src="/icons/cart.svg" alt="" className="w-5 h-5 mr-2" />
+                    Вже в кошику
+                  </>
+                ) : (
+                  <>
+                    <img src="/icons/cart-white.svg" alt="" className="w-5 h-5 mr-2" />
+                    {isAdding || cartLoading ? 'Додавання...' : 'Купити'}
+                  </>
+                )}
               </Button>
             </div>
 

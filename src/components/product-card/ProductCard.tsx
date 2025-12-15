@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@ui'
 import { cn } from '@lib/cn'
+import { useCart, useFavorites } from '@contexts'
 
 export interface Product {
   id: string
@@ -21,21 +22,50 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { addItem, loading: cartLoading, isInCart } = useCart()
+  const { toggleFavorite, isFavorite } = useFavorites()
+  const [isAdding, setIsAdding] = useState(false)
+  
   const discountPercent = product.discount || 
     (product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0)
 
   // Extract path from full URL (e.g., "http://localhost:5173/p/2-product" -> "/p/2-product")
   const productPath = product.url.replace(/^https?:\/\/[^/]+/, '')
 
-  const handleAddToCart = () => {
-    // TODO: Реалізувати логіку додавання в кошик (dispatch Redux action або API call)
-    console.log('Add to cart:', product.id)
+  // Check if this product is in favorites
+  const isProductFavorite = isFavorite(product.id)
+  
+  // Check if this product is in cart
+  const productId = parseInt(product.id, 10)
+  const productInCart = !isNaN(productId) && isInCart(productId)
+
+  const handleAddToCart = async () => {
+    if (!product.inStock) return
+    
+    setIsAdding(true)
+    try {
+      // Перетворюємо string ID на number
+      const productId = parseInt(product.id, 10)
+      if (isNaN(productId)) {
+        console.error('Invalid product ID:', product.id)
+        alert('Помилка: невірний ID товару')
+        return
+      }
+
+      // Додаємо товар в кошик (кошик відкриється автоматично в CartContext)
+      await addItem(productId)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   const handleToggleFavorite = () => {
-    // TODO: Реалізувати логіку додавання в улюблені (dispatch Redux action або API call)
-    console.log('Toggle favorite:', product.id)
+    toggleFavorite(product.id)
   }
+
+  const isButtonLoading = isAdding || cartLoading
 
   return (
     <div className={cn(
@@ -107,10 +137,10 @@ export default function ProductCard({ product }: ProductCardProps) {
             type="button"
             onClick={handleToggleFavorite}
             className="p-1 hover:bg-gray-50 rounded transition"
-            aria-label="Додати до улюблених"
+            aria-label={isProductFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
           >
             <img
-              src={product.isFavorite ? '/icons/hear-indigo-pressed.svg' : '/icons/heart-indigo.svg'}
+              src={isProductFavorite ? '/icons/hear-indigo-pressed.svg' : '/icons/heart-indigo.svg'}
               alt=""
               className="h-6 w-6"
             />
@@ -119,21 +149,35 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Add to Cart Button */}
         <Button
-          variant="contained"
+          variant={productInCart ? "outlined" : "contained"}
           size="medium"
           className="w-full"
-          disabled={!product.inStock}
+          disabled={!product.inStock || isButtonLoading}
           onClick={handleAddToCart}
         >
-          <img 
-            src={product.inStock ? '/icons/cart-white.svg' : '/icons/cart-muted.svg'} 
-            alt="" 
-            className="h-5 w-5 mr-2" 
-          />
-          {product.inStock ? 'Купити' : 'Недоступно'}
+          {productInCart ? (
+            <>
+              <img 
+                src='/icons/cart.svg' 
+                alt="" 
+                className="h-5 w-5 mr-2" 
+              />
+              Вже в кошику
+            </>
+          ) : isButtonLoading ? (
+            <span>Додавання...</span>
+          ) : (
+            <>
+              <img 
+                src={product.inStock ? '/icons/cart-white.svg' : '/icons/cart-muted.svg'} 
+                alt="" 
+                className="h-5 w-5 mr-2" 
+              />
+              {product.inStock ? 'Купити' : 'Недоступно'}
+            </>
+          )}
         </Button>
       </div>
     </div>
   )
 }
-

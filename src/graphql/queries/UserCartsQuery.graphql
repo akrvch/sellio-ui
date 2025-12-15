@@ -1,0 +1,29 @@
+query UserCarts {
+  userCarts {
+    id
+    companyId
+    userId
+    cookie
+    status
+    createdAt
+    company {
+      id
+      name
+      email
+      phone
+    }
+    items {
+      productId
+      name
+      price
+      quantity
+      product {
+        id
+        name
+        description
+        discountedPrice
+      }
+    }
+    totalAmount
+  }
+}

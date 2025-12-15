@@ -3,4 +3,8 @@ export { default as VerifyAuthCodeMutation } from './VerifyAuthCodeMutation.grap
 export { default as CompleteProfileMutation } from './CompleteProfileMutation.graphql'
 export { default as UpdateProfileMutation } from './UpdateProfileMutation.graphql'
 export { default as LogoutMutation } from './LogoutMutation.graphql'
+export { default as AddItemToCartMutation } from './AddItemToCartMutation.graphql'
+export { default as UpdateCartItemQuantityMutation } from './UpdateCartItemQuantityMutation.graphql'
+export { default as RemoveItemFromCartMutation } from './RemoveItemFromCartMutation.graphql'
+export { default as CreateOrderMutation } from './CreateOrderMutation.graphql'
 

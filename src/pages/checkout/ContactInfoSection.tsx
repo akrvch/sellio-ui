@@ -41,7 +41,7 @@ export default function ContactInfoSection({
   onEdit,
 }: ContactInfoSectionProps) {
   return (
-    <div className={`rounded-lg bg-white ${isOpen ? 'border-2 border-indigo-600 p-6' : 'p-6'}`}>
+    <div className={`rounded-lg bg-white p-6 ${isOpen ? 'border-2 border-indigo-600' : 'border border-gray-200'}`}>
       <div className={`flex items-center justify-between ${isOpen ? 'mb-6' : ''}`}>
         <Text variant="subtitle-1" className="font-bold">
           1. Контактна інформація

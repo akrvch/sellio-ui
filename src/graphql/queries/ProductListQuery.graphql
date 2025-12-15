@@ -1,0 +1,11 @@
+query ProductList($productIds: [Int!]!) {
+  productList(productIds: $productIds) {
+    id
+    name
+    url
+    price
+    discountedPrice
+    discountPercent
+  }
+}
+

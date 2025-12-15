@@ -21,7 +21,9 @@
       "@pages/*": ["pages/*"],
       "@lib/*": ["lib/*"],
       "@contexts": ["contexts"],
-      "@contexts/*": ["contexts/*"]
+      "@contexts/*": ["contexts/*"],
+      "@graphql": ["graphql"],
+      "@graphql/*": ["graphql/*"]
     }
   },
   "include": ["src", "vite-env.d.ts"]
