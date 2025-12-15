@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { cn } from '@lib/cn'
 import { Button, Input, Text } from '@ui'
-import { useCart, useFavorites } from '@contexts'
+import { useCart, useFavorites, useAuth } from '@contexts'
 import { useNavigate } from 'react-router-dom'
 import MenuButton from './MenuButton'
 import CartSidebar from '@components/cart-sidebar'
@@ -12,6 +12,7 @@ export default function Header({ className }: { className?: string }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const { itemsCount, isCartOpen, openCart, closeCart } = useCart()
   const { favoritesCount } = useFavorites()
+  const { isAuthenticated } = useAuth()
 
   return (
     <>
@@ -46,7 +47,13 @@ export default function Header({ className }: { className?: string }) {
                 <img src="/icons/user.svg" alt="user" className="h-6 w-6" />
               </button>
               <button 
-                onClick={() => navigate('/cabinet/favorites')} 
+                onClick={() => {
+                  if (isAuthenticated) {
+                    navigate('/cabinet/favorites')
+                  } else {
+                    setIsProfileOpen(true)
+                  }
+                }} 
                 className="relative p-1 hover:bg-gray-100 rounded transition-colors"
                 aria-label="Обране"
               >
@@ -88,7 +95,13 @@ export default function Header({ className }: { className?: string }) {
                   <img src="/icons/user.svg" alt="user" className="h-6 w-6" />
                 </button>
                 <button 
-                  onClick={() => navigate('/cabinet/favorites')} 
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      navigate('/cabinet/favorites')
+                    } else {
+                      setIsProfileOpen(true)
+                    }
+                  }} 
                   className="relative p-1 hover:bg-gray-100 rounded transition-colors"
                   aria-label="Обране"
                 >

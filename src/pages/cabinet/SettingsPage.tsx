@@ -10,6 +10,9 @@ export default function SettingsPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  
+  // Зберігаємо початкове значення email, щоб знати чи він був null
+  const [initialEmail, setInitialEmail] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -28,6 +31,8 @@ export default function SettingsPage() {
       setLastName(user.lastName || '')
       setEmail(user.email || '')
       setPhone(user.phone || '')
+      // Зберігаємо початкове значення email
+      setInitialEmail(user.email)
     }
   }, [user])
 
@@ -43,11 +48,17 @@ export default function SettingsPage() {
     setSuccess(false)
 
     try {
+      // Якщо email був null спочатку і залишився порожнім, відправляємо null
+      const trimmedEmail = email.trim()
+      const emailValue = initialEmail === null && trimmedEmail === '' 
+        ? null 
+        : trimmedEmail || undefined
+      
       const result = await updateProfile({
         firstName: firstName.trim(),
         secondName: secondName.trim(),
         lastName: lastName.trim(),
-        email: email.trim(),
+        email: emailValue,
       })
       
       if (result.status === 'SUCCESS') {
@@ -179,11 +190,6 @@ export default function SettingsPage() {
                 error={emailError}
                 disabled={loading}
               />
-            </div>
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16.25 5L7.5 13.75L3.75 10" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
             </div>
           </div>
         </div>

@@ -281,10 +281,8 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
       setLastNameError('')
     }
     
-    if (!email.trim()) {
-      setEmailError('Введіть email')
-      isValid = false
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // Email необов'язковий, але якщо введено, має бути валідним
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailError('Введіть коректний email')
       isValid = false
     } else {
@@ -306,7 +304,7 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
         firstName,
         secondName,
         lastName,
-        email,
+        ...(email.trim() && { email: email.trim() }),
       })
       // Successfully completed profile
       onClose()
@@ -354,7 +352,7 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <Text variant="title-2" className="font-bold">
-            {isAuthenticated ? 'Особистий кабінет' : 'Ви не авторизовані'}
+            {showCompleteProfile ? 'Завершіть реєстрацію' : isAuthenticated ? 'Особистий кабінет' : 'Ви не авторизовані'}
           </Text>
           <button
             onClick={onClose}
@@ -379,37 +377,39 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {isAuthenticated && user && (
+          {isAuthenticated && user && !showCompleteProfile && (
             <div className="mb-6">
               <UserProfileCard user={user} />
             </div>
           )}
 
-          {/* Menu Items */}
-          <div className="space-y-1">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.onClick) {
-                    navigate(item.onClick)
-                    onClose()
-                  }
-                }}
-                className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
-              >
-                <img src={item.icon} alt={item.label} className="h-6 w-6" />
-                <Text variant="body-1" className="font-medium">
-                  {item.label}
-                </Text>
-              </button>
-            ))}
-          </div>
+          {/* Menu Items - показуємо тільки якщо не завершуємо профіль */}
+          {!showCompleteProfile && (
+            <div className="space-y-1">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.onClick) {
+                      navigate(item.onClick)
+                      onClose()
+                    }
+                  }}
+                  className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <img src={item.icon} alt={item.label} className="h-6 w-6" />
+                  <Text variant="body-1" className="font-medium">
+                    {item.label}
+                  </Text>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer with Login Button */}
         <div className="p-6 border-t border-gray-200">
-          {!isAuthenticated ? (
+          {!isAuthenticated || showCompleteProfile ? (
             <>
               {/* Error Message (for non-input specific errors) */}
               {error && !showCodeInput && !showCompleteProfile && (
@@ -567,7 +567,7 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
                   />
                   <Input
                     type="email"
-                    placeholder="Email"
+                    placeholder="Email (необов'язково)"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value)

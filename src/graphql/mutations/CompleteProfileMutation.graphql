@@ -2,7 +2,7 @@ mutation CompleteProfile(
   $firstName: String!
   $secondName: String!
   $lastName: String!
-  $email: String!
+  $email: String
 ) {
   completeProfile(
     firstName: $firstName

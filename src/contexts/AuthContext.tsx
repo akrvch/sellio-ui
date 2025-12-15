@@ -30,13 +30,13 @@ type AuthContextType = {
     firstName: string
     secondName: string
     lastName: string
-    email: string
+    email?: string
   }) => Promise<{ status: string; message: string }>
   updateProfile: (data: {
     firstName?: string
     secondName?: string
     lastName?: string
-    email?: string
+    email?: string | null
   }) => Promise<{ status: string; message: string; missingFields?: string[] }>
   logout: () => Promise<void>
   
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       firstName: string
       secondName: string
       lastName: string
-      email: string
+      email?: string
     }) => {
       try {
         const { data: responseData } = await completeProfileMutation({
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       firstName?: string
       secondName?: string
       lastName?: string
-      email?: string
+      email?: string | null
     }) => {
       try {
         const { data: responseData } = await updateProfileMutation({
