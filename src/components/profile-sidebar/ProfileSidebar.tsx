@@ -390,9 +390,17 @@ export default function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps)
                 <button
                   key={item.id}
                   onClick={() => {
-                    if (item.onClick) {
-                      navigate(item.onClick)
-                      onClose()
+                    if (isAuthenticated) {
+                      // Якщо авторизований - переходимо на сторінку
+                      if (item.onClick) {
+                        navigate(item.onClick)
+                        onClose()
+                      }
+                    } else {
+                      // Якщо не авторизований - показуємо форму логіну
+                      setShowLoginInput(true)
+                      setShowCodeInput(false)
+                      setShowCompleteProfile(false)
                     }
                   }}
                   className="w-full flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
